@@ -60,3 +60,12 @@ VERIFIED: .\lumos.cmd doctor; .\lumos.cmd build --force (expected clear Qt/targe
 RISKS: Desktop build/start requires Qt6 discoverable by CMake to generate `lumos_app`
 NEXT: Install/configure Qt6 path and validate end-to-end desktop launch
 ```
+
+```text
+DATE: 2026-02-15
+FOCUS: Fix desktop launcher auto-Qt detection and Qt macro collision build break
+CHANGES: Added Qt auto-discovery in build and launcher scripts; made runtime deploy step non-fatal fallback; renamed telemetry API from `emit` to `track` to avoid Qt `emit` macro collisions
+VERIFIED: .\lumos.cmd doctor (auto-detected Qt prefix); .\lumos.cmd build --force (desktop build completes and stages lumos.exe); .\lumos.cmd start (process launches and exits cleanly in this non-interactive session)
+RISKS: Runtime launch behavior still depends on local desktop GUI/session and Qt runtime deployment environment
+NEXT: Validate `.\\lumos.cmd start` on interactive desktop session and iterate packaging/deployment behavior
+```

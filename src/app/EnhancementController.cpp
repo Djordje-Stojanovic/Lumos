@@ -13,7 +13,7 @@ EnhancementController::EnhancementController(contracts::IEnhancementPipeline& pi
 contracts::EnhancementResult EnhancementController::runEnhancement(const contracts::EnhancementRequest& request) {
     const auto [width, height] = inspectPpmDimensions(request.input_path);
     if (width > 0 && height > 0) {
-        telemetry_.emit(
+        telemetry_.track(
             "image_imported",
             {
                 {"input_path", request.input_path},
@@ -23,7 +23,7 @@ contracts::EnhancementResult EnhancementController::runEnhancement(const contrac
             });
     }
 
-    telemetry_.emit(
+    telemetry_.track(
         "enhance_clicked",
         {
             {"input_path", request.input_path},
@@ -35,7 +35,7 @@ contracts::EnhancementResult EnhancementController::runEnhancement(const contrac
 
     contracts::EnhancementResult result = pipeline_.run(request);
     if (result.ok) {
-        telemetry_.emit(
+        telemetry_.track(
             "enhance_completed",
             {
                 {"output_path", result.output_path},
@@ -46,7 +46,7 @@ contracts::EnhancementResult EnhancementController::runEnhancement(const contrac
         return result;
     }
 
-    telemetry_.emit(
+    telemetry_.track(
         "enhance_failed",
         {
             {"stage", result.error.stage},

@@ -1,5 +1,5 @@
 param(
-  [string]$BuildDir = "build\gui-native",
+  [string]$BuildDir = "build\desktop-native",
   [string]$Config = "Release",
   [switch]$Force
 )
@@ -11,7 +11,6 @@ $cmdArgs = @(
   "-NoProfile",
   "-ExecutionPolicy", "Bypass",
   "-File", $buildScript,
-  "-Kind", "gui",
   "-BuildDir", $BuildDir,
   "-Config", $Config
 )

@@ -2,7 +2,7 @@
 
 ## Context
 
-This document is the complete build specification for a local AI image and video enhancement desktop application sold as a one-time purchase on Steam and Microsoft Store. The working product name is "Lumos AI." The team is 5 senior engineers working 400 hours per week total. The target is $1M gross revenue in year 1, scaling to $100M cumulative revenue by year 5–7.
+This document is the complete build specification for a local AI image and video enhancement desktop application sold as a one-time purchase on Steam and Microsoft Store. The working product name is "Lumos AI." The execution model is lean: one owner-operator user plus one coding agent. The target is $1M gross revenue in year 1, scaling to $100M cumulative revenue by year 5–7.
 
 The opportunity: Topaz Labs proved a small team (~60 people) can build a $48M-valued business in local AI enhancement. In September 2025, Topaz switched from $299 one-time to $25–58/month subscriptions, triggering massive backlash. No AI enhancement tool exists on Steam, where 132–147M monthly active users own powerful GPUs. This is the gap.
 
@@ -511,137 +511,75 @@ DLC is implemented as feature flags, not separate codebases. All DLC code ships 
 
 Ship on Steam and Microsoft Store simultaneously. Direct website sales as third channel.
 
-### CI/CD pipeline
+### Build/Release operations (lean)
 
-- **GitHub Actions**: Every push triggers build (Windows x64, MSVC 2022), unit tests (Google Test), integration tests (process sample images, verify PSNR thresholds).
-- **Release builds**: Tagged commits trigger: build with optimizations, strip debug symbols, sign with code signing certificate, package into Steam depot and MSIX for Microsoft Store.
-- **Steam depot upload**: Automated via steamcmd in CI. Upload to beta branch → test → promote to default branch.
-- **Crash reporting**: Crashpad + Sentry/BugSplat. Non-negotiable for understanding field issues.
-
+- **Local verification first**: Before every PR, run local build and core tests on Windows x64 (MSVC 2022).
+- **Release builds**: Tagged commits produce optimized signed artifacts and package outputs for Steam depot + MSIX.
+- **Steam deployment**: Push to beta branch first, test, then promote to default branch.
+- **Crash reporting**: Crashpad + Sentry/BugSplat for field issue diagnosis.
 ---
 
-## 12. Sprint Plan (Weeks 1–36)
+## 12. Execution Plan (Weeks 1–36, Lean User+Agent Model)
 
-Team: 5 engineers × 80 hrs/week = 400 hrs/week. Sprints are 2 weeks. 18 sprints to MVP. Start: March 2026. MVP launch: Late October/November 2026. Steam "Coming Soon" page goes live in Week 2.
+Operating model: one user (product/review/merge) + one agent (implementation). Keep weekly pace sustainable, prioritize shipping over process.
 
 ### Phase 1: Foundation (Weeks 1–8)
 
-**Sprint 1–2 (Weeks 1–4): Project Setup & Core Engine Skeleton**
+- Set up monorepo with CMake, vcpkg, Qt 6, ONNX Runtime.
+- Implement GPUContext + AIInference proof-of-concept.
+- Build minimal QML app shell with drag-and-drop.
+- Implement tile split/merge and first end-to-end image upscale.
+- Steam "Coming Soon" page goes live and wishlists start.
 
-- Set up monorepo: CMake, vcpkg, Qt 6, ONNX Runtime. Verify compilation on all machines.
-- Implement GPUContext: enumerate GPUs, create DirectX 12 device, allocate resources, query VRAM.
-- Implement AIInference wrapper: load Real-ESRGAN x4plus ONNX, run inference on test image, save output. Proof of concept.
-- Create minimal Qt window with QML: display image, handle drag-and-drop.
-- Set up GitHub Actions CI: build on push, trivial test.
-- Steam "Coming Soon" page goes live. Start accumulating wishlists.
+### Phase 2: Core Product (Weeks 9–20)
 
-**Sprint 3–4 (Weeks 5–8): Processing Pipeline & Basic UI**
+- Complete primary enhancement pipeline: denoise → upscale → sharpen.
+- Build EnhanceView, before/after slider, and save/export options.
+- Add batch queue, output naming patterns, and failure recovery.
+- Implement GPU selection, VRAM monitoring, and fallback behavior.
+- Add presets and initial Workshop read path (download/apply).
 
-- Implement TileProcessor: split images into tiles, process through ONNX, merge with overlap blending.
-- Implement Pipeline: chain operations (load → tile split → AI inference → tile merge → save). Verify output quality matches reference.
-- Build EnhanceView UI: image canvas, right panel with model selector and strength slider, Enhance button with progress bar.
-- Implement before/after comparison viewer with draggable slider (GPU shader-based).
-- Add noise removal model (SCUNet). Test pipeline chaining: denoise → upscale in single pass.
-- First internal dogfooding.
+### Phase 3: Beta to Launch (Weeks 21–36)
 
-### Phase 2: Feature Complete (Weeks 9–20)
+- Closed beta: fix crashes first, then quality and UX friction.
+- Open beta: creator content push, influencer seeding, review collection.
+- Release candidate: feature freeze, regression pass, store submission.
+- Launch: Steam first-week velocity, fast support loop, hotfix critical issues within 48 hours.
 
-**Sprint 5–6 (Weeks 9–12): Batch Processing & Multi-GPU**
+### Work Rhythm (No Bloat)
 
-- Implement JobQueue with thread-safe multi-job processing. Test with 100+ file batches.
-- Build BatchView UI: thumbnail grid, per-file progress, output folder selection.
-- GPU selection UI: enumerate GPUs, show VRAM, allow switching.
-- VRAM monitoring and graceful degradation.
-- Output format handling: JPEG quality slider, PNG bit depth, WebP toggle.
-- Sharpening module: AI-guided unsharp mask compute shader.
-
-**Sprint 7–8 (Weeks 13–16): Steam Workshop & Presets**
-
-- PresetManager: save/load JSON presets.
-- Steamworks UGC API: create items, upload presets, download subscribed items.
-- WorkshopView UI: browse, subscribe/unsubscribe, manage downloads.
-- Custom model support: load any compatible ONNX model.
-- Achievements system.
-
-**Sprint 9–10 (Weeks 17–20): Polish & Advanced Features**
-
-- Settings panel: theme toggle, hotkeys, defaults, auto-update.
-- Windows shell integration: right-click context menu, file associations.
-- Watch folder mode.
-- Undo/redo enhancement history.
-- Performance optimization pass.
-- Accessibility: keyboard navigation, screen reader support, high contrast.
-
-### Phase 3: Beta & Launch (Weeks 21–36)
-
-**Sprint 11–12 (Weeks 21–24): Closed Beta**
-
-- Distribute to 200–500 users via Steam beta keys. Recruit from Discord, Reddit, photography forums.
-- Crash reporting active. Fix top 10 crashes.
-- Triage all feedback. Priority: crashes > data loss > wrong output > UX confusion > feature requests.
-- Hardware compatibility testing: GTX 1050 Ti through RTX 4090, RX 580 through RX 7900 XT, Intel Arc.
-- Begin trailer production.
-- Target: 5,000+ wishlists by end of Week 24.
-
-**Sprint 13–14 (Weeks 25–28): Open Beta & Marketing Push**
-
-- Open beta on Steam.
-- Launch TikTok/YouTube Shorts campaign: 3–5 before/after videos per week.
-- Send review copies to 20–50 micro-influencers.
-- Reddit engagement: r/photography, r/pcmasterrace, r/software, r/VideoEditing.
-- Finalize store page.
-- Target: 10,000+ wishlists by end of Week 28.
-
-**Sprint 15–16 (Weeks 29–32): Release Candidate**
-
-- Feature freeze. Bug fixes and polish only.
-- Code signing certificate. Release pipeline.
-- Microsoft Store submission (1–2 weeks for review).
-- Full regression test on 5+ GPU configurations.
-- Localization prep: externalize all UI strings (English only for v1.0).
-- Write Steam community guides.
-
-**Sprint 17–18 (Weeks 33–36): LAUNCH**
-
-- Launch on Steam with 10–15% introductory discount for 7–14 days.
-- Simultaneously launch on Microsoft Store at full price.
-- Monitor reviews. Respond to every negative review within 24 hours. Hotfix critical issues within 48 hours.
-- Post on all social channels, Discord, Reddit.
-- Target: 5,000 units in first week. $150K gross in first month.
+- One scoped change per branch
+- Local build/tests before every PR
+- Reviewer validates and merges
+- Delete branch and repeat
 
 ---
 
-## 13. Team Role Assignments
+## 13. Team Role Assignments (Lean)
 
 | Role | Primary Responsibilities | Secondary |
 |---|---|---|
-| Tech Lead / GPU Engineer (Engineer 1, strongest C++) | GPU compute pipeline, DX12 shaders, ONNX Runtime, memory management, performance | Architecture, code reviews, build system |
-| UI/UX Engineer (Engineer 2, strongest design sense) | All QML/Qt Quick UI, before/after viewer, animations, theme system | User testing, beta feedback, store page |
-| Engine Engineer (Engineer 3) | Processing pipeline, tile processor, image I/O, video I/O (FFmpeg), batch queue | AI model conversion, benchmarking |
-| Platform Engineer (Engineer 4) | Steamworks (Workshop, DLC, achievements), Windows shell, installer, Microsoft Store, CI/CD | Crash reporting, telemetry |
-| Product Lead / Generalist (Engineer 5) | Product decisions, marketing, beta management, community (Discord, Reddit), pricing | Feature specs, QA, documentation |
+| User (Owner/Reviewer) | Product priorities, acceptance testing, PR review/merge, release decisions | Marketing, community, pricing |
+| Agent (Implementation) | Code changes, local verification, bug fixes, performance improvements | Documentation and technical decomposition |
 
 ### Team cadence
 
-- Daily standup: 15 minutes, async on Slack/Discord if needed.
-- Sprint planning: Monday of sprint start. 2 hours max.
-- Sprint review: Friday of sprint end. Demo working software.
-- Code reviews: Every PR reviewed by at least one other engineer before merge.
-- Architecture decisions: Documented as ADRs in docs/adr/. Once decided, move on.
+- Weekly priority reset (30-45 minutes max)
+- PR-driven async collaboration
+- Merge only tested, scoped changes
 
 ---
-
 ## 14. Quality Assurance & Testing
 
 ### Testing strategy
 
 | Test Type | Framework | Scope | Frequency |
 |---|---|---|---|
-| Unit tests | Google Test | Engine logic: tile splitting, pipeline chaining, preset serialization, VRAM budget | Every commit (CI) |
-| Integration tests | Google Test + custom harness | Full pipeline: load → process → verify PSNR > threshold | Every PR merge (CI) |
-| GPU smoke tests | Custom harness | Real GPU: ONNX model loads, inference completes, output dimensions correct | Nightly (CI with GPU runner) |
+| Unit tests | Google Test | Engine logic: tile splitting, pipeline chaining, preset serialization, VRAM budget | Every commit (local) |
+| Integration tests | Google Test + custom harness | Full pipeline: load → process → verify PSNR > threshold | Every PR merge (local + reviewer) |
+| GPU smoke tests | Custom harness | Real GPU: ONNX model loads, inference completes, output dimensions correct | Weekly manual on target GPUs |
 | UI tests | Qt Test + Squish (if budget) | Critical flows: drag-drop, enhance, before/after, batch | Weekly manual |
-| Performance benchmarks | Custom harness + timer | Processing time per model per GPU. Alert if regression > 10% | Weekly (CI) |
+| Performance benchmarks | Custom harness + timer | Processing time per model per GPU. Alert if regression > 10% | Weekly manual |
 | Compatibility matrix | Manual + automated | GTX 1050 Ti, RTX 3060, RTX 4070, RX 6700 XT, RX 7800 XT, Arc A770 | Before each release |
 
 ### Quality gates for release
@@ -669,30 +607,26 @@ Team: 5 engineers × 80 hrs/week = 400 hrs/week. Sprints are 2 weeks. 18 sprints
 | 16 | Influencer | Early access keys to 10 micro-influencers (10K–100K subs) | 2–3 videos |
 | 20 | All | Announce beta sign-up | 5,000 wishlists |
 | 24 | TikTok/Shorts | 3–5 videos/week. Emotional: old photo restorations. | 10,000 wishlists |
-| 28 | Reddit | AMA: "5 devs building a one-time-purchase Topaz alternative. AMA." | 500+ upvotes |
+| 28 | Reddit | AMA: "Indie team building a one-time-purchase Topaz alternative. AMA." | 500+ upvotes |
 | 32 | Press | Press releases to PetaPixel, DPReview, TechRadar, PCGamer | 2–3 articles |
 | 36 | LAUNCH | Coordinated push across all channels | 5,000 units Week 1 |
 
 ### Content strategy
 
-AI enhancement tools produce naturally viral content: dramatic before/after transformations. Every piece of content follows the same formula: show bad image → show transformation → reveal result.
+AI enhancement tools produce naturally viral content: dramatic before/after transformations. Keep the format consistent and execution lightweight.
 
-| Content Type | Platform | Frequency | Format |
-|---|---|---|---|
-| "Watch this old photo come alive" | TikTok, Shorts, Reels | 3–5/week | 15–30 sec vertical, dramatic music |
-| "Upscaling game screenshots to 8K" | Reddit (r/pcmasterrace, r/gaming) | 1–2/week | Image post, before/after |
-| Devlog: technical deep-dive | YouTube | Biweekly | 5–10 min |
-| "Blurry photo → crystal clear" | Twitter/X | Daily | Side-by-side image |
-| User showcase spotlight | Discord, all channels | Weekly | Community results with permission |
+- Short-form before/after clips: TikTok/Shorts/Reels, 3-5 per week.
+- Image showcases: Reddit and X, daily or near-daily cadence.
+- Technical devlog: YouTube every 1-2 weeks.
+- Weekly community spotlight from user-submitted results.
 
 ### Launch week tactics
 
-1. Launch with 10–15% discount for 7 days. Creates urgency. Steam algorithm favors initial velocity.
+1. Launch with 10-15% discount for 7 days.
 2. Coordinate influencer embargo lift with launch date.
-3. Post threads on Reddit, Hacker News, Product Hunt.
-4. Respond to every Steam review in first week.
-5. Hotfix within 48 hours of any critical bug.
-6. Daily Discord activity during launch week.
+3. Post launch threads on Reddit, Hacker News, and Product Hunt.
+4. Respond to every Steam review in week one.
+5. Hotfix critical bugs within 48 hours.
 
 ---
 
@@ -731,7 +665,7 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 | AI model quality plateaus | Low | Medium | Models still improving annually. Workshop provides variety. Custom training if needed. |
 | GPU compatibility issues | High | High | Budget 20% dev time for compatibility testing. DirectML broadest compat. Test 6+ GPUs. |
 | Steam rejects or buries the app | Low | High | Comply with guidelines. Microsoft Store as backup (better margins anyway). |
-| Team burnout at 80 hrs/week | High | Very High | This is the biggest risk. 80 hrs/week is not sustainable beyond 3–4 months. Plan for 60–65 sustained with 80-hour surges around beta and launch only. |
+| Team overload in a 2-person model | Medium | High | Keep sustainable pace, cap WIP, prioritize by revenue leverage, and defer non-core work. |
 | Review bombing | Low | Medium | Respond professionally. Quality (90%+) drowns out trolls. |
 | Qt LGPL compliance misstep | Low | High | Dynamic linking only. Never modify Qt source. Budget for commercial license as insurance. |
 
@@ -761,7 +695,6 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 - Multiple exit paths with $100M+ cumulative and 2.5M+ customers:
   - **Continue independently**: $10–25M/yr with small team, 50%+ margins.
   - **Acquisition**: Canva acquired Affinity for $380M–$1B. Adobe, Canva, or similar could acquire for AI capabilities and user base.
-  - **Optional subscription transition**: After building massive one-time user base, optionally offer subscription tier for new features while grandfathering existing users.
 
 ---
 
@@ -806,3 +739,8 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 | FFmpeg | ffmpeg.org/documentation.html | Video codec reference |
 | vcpkg | github.com/microsoft/vcpkg | C++ dependency management |
 | CMake | cmake.org/cmake/help/latest/ | Build system reference |
+
+
+
+
+

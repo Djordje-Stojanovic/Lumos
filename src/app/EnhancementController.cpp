@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -9,6 +10,25 @@ namespace lumos::app {
 
 EnhancementController::EnhancementController(contracts::IEnhancementPipeline& pipeline, common::Telemetry& telemetry)
     : pipeline_(pipeline), telemetry_(telemetry) {}
+
+void EnhancementController::trackInputSelected(const std::string& input_path) {
+    if (input_path.empty()) {
+        return;
+    }
+
+    std::map<std::string, std::string> fields {
+        {"input_path", input_path},
+        {"input_ext", std::filesystem::path(input_path).extension().string()},
+    };
+
+    const auto [width, height] = inspectPpmDimensions(input_path);
+    if (width > 0 && height > 0) {
+        fields["input_width"] = std::to_string(width);
+        fields["input_height"] = std::to_string(height);
+    }
+
+    telemetry_.track("input_selected", std::move(fields));
+}
 
 contracts::EnhancementResult EnhancementController::runEnhancement(const contracts::EnhancementRequest& request) {
     const auto [width, height] = inspectPpmDimensions(request.input_path);

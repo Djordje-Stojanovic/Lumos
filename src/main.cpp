@@ -1,6 +1,12 @@
 #if defined(LUMOS_WITH_QT)
+#include "app/EnhancementController.h"
+#include "common/Telemetry.h"
+#include "engine/CpuStubPipeline.h"
+#include "ui/EnhanceViewModel.h"
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QUrl>
 #endif
 
@@ -10,6 +16,12 @@ int main(int argc, char* argv[]) {
 #if defined(LUMOS_WITH_QT)
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
+
+    lumos::common::Telemetry telemetry;
+    lumos::engine::CpuStubPipeline pipeline;
+    lumos::app::EnhancementController controller(pipeline, telemetry);
+    lumos::ui::EnhanceViewModel enhance_view_model(controller);
+    engine.rootContext()->setContextProperty("enhanceViewModel", &enhance_view_model);
 
     const QUrl main_window_url = QUrl::fromLocalFile(QStringLiteral("src/ui/qml/MainWindow.qml"));
     QObject::connect(

@@ -1,63 +1,27 @@
 # Lumos AI
 
-Lumos AI is a local-first Windows desktop application for AI image and video enhancement, sold as a one-time purchase on Steam and Microsoft Store.
+Windows-native AI enhancement studio built for creators and gamers.
+One-time purchase, local processing, premium output quality, no subscription lock-in.
 
-## Product Position
+## Get Running in 2 Steps
 
-- No subscription lock-in
-- No cloud dependency for core enhancement
-- Fast, high-quality enhancement on consumer GPUs
+Prerequisites: Visual Studio 2022 Build Tools (C++ workload), CMake 3.24+, PowerShell.
 
-## Tech Stack
+### 1. Install Qt6 (one-time, about 2 minutes)
 
-- C++20
-- Qt 6 (QML + C++)
-- CMake 3.24+
-- ONNX Runtime 1.17+
-- DirectX 12 compute (+ Vulkan fallback)
-- FFmpeg 6.x
-- SQLite3
-- spdlog
-- Google Test + Qt Test (via CTest)
-
-## Repository Layout
-
-- `src/` application code
-- `tests/` unit/integration tests
-- `models/` AI model assets
-- `shaders/` GPU shaders
-- `resources/` static assets
-- `docs/` design and architecture notes
-
-## Local Build
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release -j
-ctest --test-dir build -C Release --output-on-failure
+```powershell
+uvx --from aqtinstall aqt.exe install-qt -O C:\Qt windows desktop 6.10.2 win64_msvc2022_64
 ```
 
-## CI Quality Gate
+### 2. Build and launch
 
-Required workflow: `core-quality-gate` (`.github/workflows/core-quality-gate.yml`)
-
-Triggers:
-
-- Pull requests targeting `main`
-- Pushes to `feature/**`
-- Manual runs via `workflow_dispatch`
-
-CI command parity (core-only, no Qt dependency):
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DLUMOS_BUILD_UI=OFF -DLUMOS_BUILD_TESTS=ON
-cmake --build build --config Release -j
-ctest --test-dir build -C Release --output-on-failure
+```powershell
+.\lumos.cmd gui
 ```
 
-## Windows Launcher Workflow
+That is it. `lumos.cmd` auto-discovers Qt from `C:\Qt` (also checks `%USERPROFILE%\Qt` and `C:\Program Files\Qt`) and auto-builds when needed.
 
-Desktop-only launcher from repo root:
+## Prefer an Explicit 3-Step Flow
 
 ```powershell
 .\lumos.cmd doctor
@@ -65,32 +29,43 @@ Desktop-only launcher from repo root:
 .\lumos.cmd start
 ```
 
-Command-order rule:
+## All Commands
 
+```powershell
+.\lumos.cmd gui             # auto-builds if needed, then launches GUI
+.\lumos.cmd start           # launches existing GUI build
+.\lumos.cmd build           # incremental GUI build
+.\lumos.cmd build --force   # full rebuild
+.\lumos.cmd doctor          # toolchain + Qt discovery check
+.\lumos.cmd help            # usage reference
+```
+
+Command order rule:
 - Correct: `.\lumos.cmd build --force`
 - Wrong: `.\lumos.cmd --force build`
 
-Launcher implementation files:
+## Why Lumos
 
-- `lumos.cmd` thin wrapper entrypoint
-- `installer/windows/lumos_launcher.ps1` command dispatcher
-- `installer/windows/build_shell_native.ps1` desktop build wrapper
-- `installer/windows/build_native.ps1` desktop native build + dist staging
+- Steam-first native desktop app feel (C++20 + Qt6)
+- Local AI enhancement workflow users can trust
+- Fast path to user delight: import -> enhance -> compare -> save
+- Revenue model aligned with users: one-time purchase, no forced subscription
 
-## Development Workflow
+## CI Quality Gate
 
-Bootstrap once (allowed direct push to main):
+Required workflow: `core-quality-gate` (`.github/workflows/core-quality-gate.yml`)
+
+CI parity command (core-only, no Qt dependency):
 
 ```bash
-git init
-git add -A
-git commit -m "chore: bootstrap lumos lean governance"
-git branch -M main
-git remote add origin <REPLACE_WITH_GITHUB_REMOTE>
-git push -u origin main
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DLUMOS_BUILD_UI=OFF -DLUMOS_BUILD_TESTS=ON
+cmake --build build --config Release -j
+ctest --test-dir build -C Release --output-on-failure
 ```
 
-Then for every change:
+## Dev Workflow
+
+After bootstrap, every change goes through a feature branch + PR:
 
 1. `git fetch origin && git rebase origin/main`
 2. `git checkout -b feature/<scope>-<desc>`
@@ -99,8 +74,3 @@ Then for every change:
 5. Commit + push branch
 6. Open PR
 7. User validates/tests/merges
-8. Delete branch
-
-## Core Rule
-
-After bootstrap, no direct pushes to `main`.

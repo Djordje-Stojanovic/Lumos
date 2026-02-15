@@ -599,16 +599,10 @@ Operating model: one user (product/review/merge) + one agent (implementation). K
 | Week | Channel | Action | KPI |
 |---|---|---|---|
 | 2 | Steam | "Coming Soon" page live | Wishlist tracking begins |
-| 4 | Twitter/X | Build-in-public thread. First before/after result. | 100 followers |
-| 4 | Discord | Launch server (#showcase, #dev-updates, #feedback) | 50 members |
-| 6 | Reddit | First post to r/photography | 50 upvotes |
-| 8 | TikTok/Shorts | First before/after video, 15 seconds | 1,000 views |
-| 12 | YouTube | First devlog, 5–10 min | 500 views |
 | 16 | Influencer | Early access keys to 10 micro-influencers (10K–100K subs) | 2–3 videos |
 | 20 | All | Announce beta sign-up | 5,000 wishlists |
 | 24 | TikTok/Shorts | 3–5 videos/week. Emotional: old photo restorations. | 10,000 wishlists |
 | 28 | Reddit | AMA: "Indie team building a one-time-purchase Topaz alternative. AMA." | 500+ upvotes |
-| 32 | Press | Press releases to PetaPixel, DPReview, TechRadar, PCGamer | 2–3 articles |
 | 36 | LAUNCH | Coordinated push across all channels | 5,000 units Week 1 |
 
 ### Content strategy
@@ -617,16 +611,14 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 
 - Short-form before/after clips: TikTok/Shorts/Reels, 3-5 per week.
 - Image showcases: Reddit and X, daily or near-daily cadence.
-- Technical devlog: YouTube every 1-2 weeks.
 - Weekly community spotlight from user-submitted results.
 
 ### Launch week tactics
 
 1. Launch with 10-15% discount for 7 days.
 2. Coordinate influencer embargo lift with launch date.
-3. Post launch threads on Reddit, Hacker News, and Product Hunt.
-4. Respond to every Steam review in week one.
-5. Hotfix critical bugs within 48 hours.
+3. Respond to every Steam review in week one.
+4. Hotfix critical bugs within 48 hours.
 
 ---
 
@@ -650,8 +642,6 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 | Daily active users | 2,000 | 5,000 | 8,000 | Engaged users = reviews + Workshop |
 | Workshop items | 50 | 500 | 2,000+ | UGC flywheel |
 | DLC attach rate | N/A | 15% | 25% | Revenue multiplier |
-| TikTok/Shorts views | 100K | 1M+ | 5M+ | Primary organic channel |
-| Discord members | 500 | 3,000 | 8,000 | Community = retention |
 | Refund rate | < 10% | < 8% | < 5% | High refunds = product problem |
 
 ---
@@ -666,7 +656,6 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 | GPU compatibility issues | High | High | Budget 20% dev time for compatibility testing. DirectML broadest compat. Test 6+ GPUs. |
 | Steam rejects or buries the app | Low | High | Comply with guidelines. Microsoft Store as backup (better margins anyway). |
 | Team overload in a 2-person model | Medium | High | Keep sustainable pace, cap WIP, prioritize by revenue leverage, and defer non-core work. |
-| Review bombing | Low | Medium | Respond professionally. Quality (90%+) drowns out trolls. |
 | Qt LGPL compliance misstep | Low | High | Dynamic linking only. Never modify Qt source. Budget for commercial license as insurance. |
 
 ---
@@ -679,16 +668,12 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 - Localization: German, Japanese, Chinese (Simplified), Korean, Portuguese.
 - macOS port (Qt cross-platform; replace DX12 with Metal compute).
 - Linux port (Vulkan already the fallback; lower effort than macOS).
-- Custom model training on curated datasets.
-- Partnership explorations with photo management tools.
 
 ### Year 3–4: Category leadership ($10–25M/yr)
 
 - Target 500K+ total owners.
-- Enterprise/B2B licensing for studios, print shops, archival organizations.
 - API/SDK for third-party integration.
 - Advanced AI: style transfer, AI color grading, intelligent cropping.
-- Mobile companion app (iOS/Android) with preset sync.
 
 ### Year 5–7: $100M cumulative & exit options
 
@@ -730,17 +715,10 @@ AI enhancement tools produce naturally viral content: dramatic before/after tran
 | Resource | URL / Reference | Purpose |
 |---|---|---|
 | Qt 6 Documentation | doc.qt.io/qt-6/ | API reference and tutorials |
-| Qt Quick/QML Guide | doc.qt.io/qt-6/qtquick-index.html | QML language reference |
 | ONNX Runtime | onnxruntime.ai/docs/ | API, execution providers, optimization |
 | Real-ESRGAN | github.com/xinntao/Real-ESRGAN | Model architecture, ONNX export |
 | Steamworks SDK | partner.steamgames.com/doc/ | Steam integration docs |
-| Steam Workshop | partner.steamgames.com/doc/features/workshop | UGC API reference |
 | DirectX 12 Guide | learn.microsoft.com/en-us/windows/win32/direct3d12/ | DX12 compute, resources |
 | FFmpeg | ffmpeg.org/documentation.html | Video codec reference |
 | vcpkg | github.com/microsoft/vcpkg | C++ dependency management |
 | CMake | cmake.org/cmake/help/latest/ | Build system reference |
-
-
-
-
-

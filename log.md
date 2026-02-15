@@ -42,3 +42,12 @@ VERIFIED: .\lumos.cmd doctor; .\lumos.cmd --force build (expected command-order 
 RISKS: CLI flow depends on a dedicated CLI executable target (`lumos_cli`) that is not part of current core scaffold yet
 NEXT: Add a first CLI binary target or route CLI command to a supported fallback target
 ```
+
+```text
+DATE: 2026-02-15
+FOCUS: Upgrade coding standards for UI-first 2026 quality bar
+CHANGES: Rewrote coding_guidelines.md with stack-specific SOTA conventions; updated AGENTS.md and CLAUDE.md to require coding_guidelines.md and mandatory Elon principles on every task
+VERIFIED: Manual doc review for consistency and enforcement references
+RISKS: None
+NEXT: Apply the updated standards to upcoming UI and engine iterations
+```

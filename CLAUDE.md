@@ -2,6 +2,18 @@
 
 Lumos AI is a local-first Windows desktop app for AI image and video enhancement. It is sold as a one-time purchase on Steam and Microsoft Store, with no subscription requirement and no cloud dependency for core processing.
 
+## Mandatory Standards
+
+1. `coding_guidelines.md` is the required source of truth for coding style, UI/UX quality, maintainability, and implementation conventions.
+2. All agents must follow `coding_guidelines.md` on every task.
+3. Elon principles are mandatory:
+   - Question the requirement
+   - Delete unnecessary parts/processes
+   - Simplify what remains
+   - Accelerate only validated bottlenecks
+   - Automate only stable workflows
+4. If any local preference conflicts with `coding_guidelines.md`, `coding_guidelines.md` wins.
+
 ## Tech Stack
 
 - Language: C++20
@@ -49,15 +61,16 @@ All work after bootstrap happens on feature branches and pull requests.
 
 ### Normal Change Loop (every change after bootstrap)
 
-1. `git fetch origin && git rebase origin/main`
-2. `git checkout -b feature/<scope>-<short-desc>`
-3. Implement only scoped change
-4. Run tests relevant to changed scope
-5. `git add -A && git commit -m "<type>(<scope>): <what and why>"`
-6. `git push origin feature/<scope>-<short-desc>`
-7. `gh pr create --title "<type>(<scope>): <desc>" --body "<what changed and why>"`
-8. User validates and merges (`--squash --delete-branch`)
-9. Sync main and start next small branch
+1. Read and apply `coding_guidelines.md`
+2. `git fetch origin && git rebase origin/main`
+3. `git checkout -b feature/<scope>-<short-desc>`
+4. Implement only scoped change
+5. Run tests relevant to changed scope
+6. `git add -A && git commit -m "<type>(<scope>): <what and why>"`
+7. `git push origin feature/<scope>-<short-desc>`
+8. `gh pr create --title "<type>(<scope>): <desc>" --body "<what changed and why>"`
+9. User validates and merges (`--squash --delete-branch`)
+10. Sync main and start next small branch
 
 ## Verification Commands
 
@@ -81,3 +94,4 @@ ctest --test-dir build --output-on-failure
 - No cloud dependency for core enhancement.
 - No speculative architecture layers without measured need.
 - No large multi-concern PRs.
+- No deviation from `coding_guidelines.md` conventions or mandatory Elon principles.

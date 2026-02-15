@@ -34,7 +34,25 @@ Lumos AI is a local-first Windows desktop application for AI image and video enh
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release -j
-ctest --test-dir build --output-on-failure
+ctest --test-dir build -C Release --output-on-failure
+```
+
+## CI Quality Gate
+
+Required workflow: `core-quality-gate` (`.github/workflows/core-quality-gate.yml`)
+
+Triggers:
+
+- Pull requests targeting `main`
+- Pushes to `feature/**`
+- Manual runs via `workflow_dispatch`
+
+CI command parity (core-only, no Qt dependency):
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DLUMOS_BUILD_UI=OFF -DLUMOS_BUILD_TESTS=ON
+cmake --build build --config Release -j
+ctest --test-dir build -C Release --output-on-failure
 ```
 
 ## Windows Launcher Workflow

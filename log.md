@@ -69,3 +69,12 @@ VERIFIED: .\lumos.cmd doctor (auto-detected Qt prefix); .\lumos.cmd build --forc
 RISKS: Runtime launch behavior still depends on local desktop GUI/session and Qt runtime deployment environment
 NEXT: Validate `.\\lumos.cmd start` on interactive desktop session and iterate packaging/deployment behavior
 ```
+
+```text
+DATE: 2026-02-15
+FOCUS: Add automated core CI quality gate to accelerate delivery velocity
+CHANGES: Added GitHub Actions workflow `core-quality-gate` for PR/feature-branch validation, added PR template with Why/What/Validation structure, and aligned docs/standards commands to use `ctest -C Release`
+VERIFIED: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release; cmake --build build --config Release -j; ctest --test-dir build -C Release --output-on-failure (3/3 tests passed)
+RISKS: Qt UI build is intentionally excluded from this first gate (`LUMOS_BUILD_UI=OFF`)
+NEXT: Add an optional non-blocking Qt smoke CI job once a stable Qt toolchain source is locked for CI runners
+```

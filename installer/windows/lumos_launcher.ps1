@@ -142,7 +142,8 @@ function Invoke-Build([switch]$Force, [hashtable]$Paths) {
   if ($Force) {
     $guiCmd += "-Force"
   }
-  & powershell @guiCmd
+  # Stream child build output to host without leaking it into caller return values.
+  & powershell @guiCmd | Out-Host
   if ($LASTEXITCODE -ne 0) { throw "Desktop build failed." }
 }
 

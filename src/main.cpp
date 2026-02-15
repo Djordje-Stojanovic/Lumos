@@ -1,5 +1,3 @@
-#include "common/Telemetry.h"
-
 #if defined(LUMOS_WITH_QT)
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -9,9 +7,6 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    lumos::common::Telemetry telemetry;
-    telemetry.emit("app_started", {{"mode", "desktop"}});
-
 #if defined(LUMOS_WITH_QT)
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;

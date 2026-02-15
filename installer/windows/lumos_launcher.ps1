@@ -6,6 +6,43 @@ function Get-RepoRoot {
   return (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 
+function Resolve-QtPrefix {
+  if (-not [string]::IsNullOrWhiteSpace($env:CMAKE_PREFIX_PATH)) {
+    $paths = $env:CMAKE_PREFIX_PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    foreach ($path in $paths) {
+      if (Test-Path (Join-Path $path "lib\cmake\Qt6\Qt6Config.cmake")) {
+        return $path
+      }
+    }
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($env:QTDIR)) {
+    if (Test-Path (Join-Path $env:QTDIR "lib\cmake\Qt6\Qt6Config.cmake")) {
+      return $env:QTDIR
+    }
+  }
+
+  $roots = @("C:\Qt", "$env:USERPROFILE\Qt", "C:\Program Files\Qt")
+  foreach ($root in $roots) {
+    if (-not (Test-Path $root)) {
+      continue
+    }
+
+    $candidates = Get-ChildItem -Path $root -Directory -Recurse -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -match "msvc.*64" } |
+      Sort-Object FullName -Descending
+
+    foreach ($candidate in $candidates) {
+      $configPath = Join-Path $candidate.FullName "lib\cmake\Qt6\Qt6Config.cmake"
+      if (Test-Path $configPath) {
+        return $candidate.FullName
+      }
+    }
+  }
+
+  return ""
+}
+
 function Get-PathMap([string]$RepoRoot) {
   return @{
     DesktopDist = Join-Path $RepoRoot "build\desktop-native\dist\lumos.exe"
@@ -70,6 +107,13 @@ function Invoke-Doctor([hashtable]$Paths) {
     Write-Host "[warn] No Qt path hints found in CMAKE_PREFIX_PATH/QTDIR"
   }
 
+  $detectedQtPrefix = Resolve-QtPrefix
+  if (-not [string]::IsNullOrWhiteSpace($detectedQtPrefix)) {
+    Write-Host "[ok] Auto-detected Qt prefix: $detectedQtPrefix"
+  } else {
+    Write-Host "[warn] No auto-detected Qt prefix found in common install paths"
+  }
+
   if (Test-Path $Paths.DesktopDist) {
     Write-Host "[ok] Desktop artifact: $($Paths.DesktopDist)"
   } else {
@@ -110,6 +154,25 @@ function Ensure-Built([switch]$Force, [hashtable]$Paths) {
   return $artifact
 }
 
+function Start-Desktop([string]$DesktopExe, [string[]]$ForwardArgs) {
+  $qtPrefix = Resolve-QtPrefix
+  $originalPath = $env:PATH
+
+  try {
+    if (-not [string]::IsNullOrWhiteSpace($qtPrefix)) {
+      $qtBin = Join-Path $qtPrefix "bin"
+      if (Test-Path $qtBin) {
+        $env:PATH = "$qtBin;$env:PATH"
+      }
+    }
+
+    & $DesktopExe @ForwardArgs
+    return $LASTEXITCODE
+  } finally {
+    $env:PATH = $originalPath
+  }
+}
+
 function Assert-CommandOrder([string[]]$AllArgs) {
   if ($AllArgs.Count -gt 0 -and $AllArgs[0].StartsWith("-")) {
     throw "Unknown leading flag '$($AllArgs[0])'. Use command-first syntax, e.g. .\lumos.cmd build --force"
@@ -121,8 +184,8 @@ $paths = Get-PathMap -RepoRoot $repoRoot
 
 if ($Args.Count -eq 0) {
   $desktopExe = Ensure-Built -Paths $paths
-  & $desktopExe
-  exit $LASTEXITCODE
+  $exitCode = Start-Desktop -DesktopExe $desktopExe -ForwardArgs @()
+  exit $exitCode
 }
 
 Assert-CommandOrder -AllArgs $Args
@@ -154,15 +217,15 @@ switch ($command) {
   "start" {
     $parsed = Split-ForceFlag -InputArgs $tail
     $desktopExe = Ensure-Built -Force:([bool]$parsed.Force) -Paths $paths
-    & $desktopExe @($parsed.Args)
-    exit $LASTEXITCODE
+    $exitCode = Start-Desktop -DesktopExe $desktopExe -ForwardArgs @($parsed.Args)
+    exit $exitCode
   }
 
   "gui" {
     $parsed = Split-ForceFlag -InputArgs $tail
     $desktopExe = Ensure-Built -Force:([bool]$parsed.Force) -Paths $paths
-    & $desktopExe @($parsed.Args)
-    exit $LASTEXITCODE
+    $exitCode = Start-Desktop -DesktopExe $desktopExe -ForwardArgs @($parsed.Args)
+    exit $exitCode
   }
 
   "cli" {

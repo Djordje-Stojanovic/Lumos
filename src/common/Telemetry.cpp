@@ -15,7 +15,7 @@ Telemetry::Telemetry(std::filesystem::path log_path) : log_path_(std::move(log_p
     }
 }
 
-void Telemetry::emit(std::string name, std::map<std::string, std::string> fields) {
+void Telemetry::track(std::string name, std::map<std::string, std::string> fields) {
     const auto now = std::chrono::system_clock::now();
 
     TelemetryEvent event {

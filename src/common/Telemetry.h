@@ -19,7 +19,7 @@ class Telemetry {
   public:
     explicit Telemetry(std::filesystem::path log_path = defaultLogPath());
 
-    void emit(std::string name, std::map<std::string, std::string> fields = {});
+    void track(std::string name, std::map<std::string, std::string> fields = {});
 
     [[nodiscard]] static std::filesystem::path defaultLogPath();
     [[nodiscard]] const std::filesystem::path& logPath() const noexcept;

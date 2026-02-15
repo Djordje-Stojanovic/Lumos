@@ -37,7 +37,21 @@ function Get-AvailableTargets([string]$ResolvedBuildDir) {
 }
 
 function Invoke-CMakeConfigure([string]$RepoRoot, [string]$ResolvedBuildDir) {
-  & cmake -S $RepoRoot -B $ResolvedBuildDir -G "Visual Studio 17 2022" -A x64 -DLUMOS_BUILD_UI=ON
+  $configureArgs = @(
+    "-S", $RepoRoot,
+    "-B", $ResolvedBuildDir,
+    "-G", "Visual Studio 17 2022",
+    "-A", "x64",
+    "-DLUMOS_BUILD_UI=ON"
+  )
+
+  $qtPrefix = Resolve-QtPrefix
+  if (-not [string]::IsNullOrWhiteSpace($qtPrefix)) {
+    $configureArgs += "-DCMAKE_PREFIX_PATH=$qtPrefix"
+    Write-Host "[info] Using Qt prefix: $qtPrefix"
+  }
+
+  & cmake @configureArgs
   if ($LASTEXITCODE -ne 0) {
     throw "cmake configure failed for $ResolvedBuildDir"
   }
@@ -93,20 +107,81 @@ function Stage-DistExecutable([string]$ResolvedBuildDir, [string]$Config) {
 function Try-DeployQtRuntime([string]$RepoRoot, [string]$DistExePath) {
   $windeployqt = Get-Command windeployqt -ErrorAction SilentlyContinue
   if ($null -eq $windeployqt) {
+    $qtPrefix = Resolve-QtPrefix
+    if (-not [string]::IsNullOrWhiteSpace($qtPrefix)) {
+      $candidate = Join-Path $qtPrefix "bin\windeployqt.exe"
+      if (Test-Path $candidate) {
+        $windeployqt = Get-Item $candidate
+      }
+    }
+  }
+
+  if ($null -eq $windeployqt) {
     Write-Host "[warn] windeployqt not found; runtime DLL deployment skipped."
     return
   }
 
+  $windeployqtPath = if ($windeployqt.PSObject.Properties.Name -contains "Source") { $windeployqt.Source } else { $windeployqt.FullName }
+  if ([string]::IsNullOrWhiteSpace($windeployqtPath) -or -not (Test-Path $windeployqtPath)) {
+    Write-Host "[warn] windeployqt path could not be resolved; runtime DLL deployment skipped."
+    return
+  }
+
+  $deployBin = Split-Path $windeployqtPath -Parent
+  $originalPath = $env:PATH
+  $env:PATH = "$deployBin;$env:PATH"
+
   $qmlDir = Join-Path $RepoRoot "src\ui\qml"
-  if (Test-Path $qmlDir) {
-    & $windeployqt.Source --no-translations --qmldir $qmlDir $DistExePath
-  } else {
-    & $windeployqt.Source --no-translations $DistExePath
+  try {
+    if (Test-Path $qmlDir) {
+      & $windeployqtPath --no-translations --qmldir $qmlDir $DistExePath
+    } else {
+      & $windeployqtPath --no-translations $DistExePath
+    }
+  } finally {
+    $env:PATH = $originalPath
   }
 
   if ($LASTEXITCODE -ne 0) {
-    throw "windeployqt failed for $DistExePath"
+    Write-Host "[warn] windeployqt failed for $DistExePath; continuing with PATH-based Qt runtime resolution."
   }
+}
+
+function Resolve-QtPrefix {
+  if (-not [string]::IsNullOrWhiteSpace($env:CMAKE_PREFIX_PATH)) {
+    $paths = $env:CMAKE_PREFIX_PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    foreach ($path in $paths) {
+      if (Test-Path (Join-Path $path "lib\cmake\Qt6\Qt6Config.cmake")) {
+        return $path
+      }
+    }
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($env:QTDIR)) {
+    if (Test-Path (Join-Path $env:QTDIR "lib\cmake\Qt6\Qt6Config.cmake")) {
+      return $env:QTDIR
+    }
+  }
+
+  $roots = @("C:\Qt", "$env:USERPROFILE\Qt", "C:\Program Files\Qt")
+  foreach ($root in $roots) {
+    if (-not (Test-Path $root)) {
+      continue
+    }
+
+    $candidates = Get-ChildItem -Path $root -Directory -Recurse -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -match "msvc.*64" } |
+      Sort-Object FullName -Descending
+
+    foreach ($candidate in $candidates) {
+      $configPath = Join-Path $candidate.FullName "lib\cmake\Qt6\Qt6Config.cmake"
+      if (Test-Path $configPath) {
+        return $candidate.FullName
+      }
+    }
+  }
+
+  return ""
 }
 
 $repoRoot = Get-RepoRoot

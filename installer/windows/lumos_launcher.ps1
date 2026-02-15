@@ -8,10 +8,8 @@ function Get-RepoRoot {
 
 function Get-PathMap([string]$RepoRoot) {
   return @{
-    GuiDist = Join-Path $RepoRoot "build\gui-native\dist\lumos-gui.exe"
-    CliDist = Join-Path $RepoRoot "build\cli-native\dist\lumos-cli.exe"
+    DesktopDist = Join-Path $RepoRoot "build\desktop-native\dist\lumos.exe"
     GuiBuildScript = Join-Path $RepoRoot "installer\windows\build_shell_native.ps1"
-    CliBuildScript = Join-Path $RepoRoot "installer\windows\build_platform_native.ps1"
     CMakeLists = Join-Path $RepoRoot "CMakeLists.txt"
   }
 }
@@ -21,13 +19,12 @@ function Write-Usage {
   Write-Host ""
   Write-Host "Usage:"
   Write-Host "  .\lumos.cmd"
-  Write-Host "  .\lumos.cmd gui [--force] [args...]"
-  Write-Host "  .\lumos.cmd cli [--force] [args...]"
+  Write-Host "  .\lumos.cmd start [--force] [args...]"
   Write-Host "  .\lumos.cmd doctor"
-  Write-Host "  .\lumos.cmd build [all|gui|cli] [--force]"
+  Write-Host "  .\lumos.cmd build [--force]"
   Write-Host ""
   Write-Host "Command-order rule:"
-  Write-Host "  Correct: .\lumos.cmd build all --force"
+  Write-Host "  Correct: .\lumos.cmd build --force"
   Write-Host "  Wrong:   .\lumos.cmd --force build"
 }
 
@@ -41,7 +38,7 @@ function Invoke-Doctor([hashtable]$Paths) {
   if (Test-Path $Paths.CMakeLists) {
     Write-Host "[ok] CMakeLists.txt found"
   } else {
-    Write-Host "[warn] CMakeLists.txt missing (build commands will fail until project scaffold is merged)"
+    Write-Host "[warn] CMakeLists.txt missing (desktop build/start commands will fail)"
   }
 
   if (Test-CommandAvailable "cmake") {
@@ -73,16 +70,10 @@ function Invoke-Doctor([hashtable]$Paths) {
     Write-Host "[warn] No Qt path hints found in CMAKE_PREFIX_PATH/QTDIR"
   }
 
-  if (Test-Path $Paths.GuiDist) {
-    Write-Host "[ok] GUI artifact: $($Paths.GuiDist)"
+  if (Test-Path $Paths.DesktopDist) {
+    Write-Host "[ok] Desktop artifact: $($Paths.DesktopDist)"
   } else {
-    Write-Host "[info] GUI artifact missing (build with .\lumos.cmd build gui)"
-  }
-
-  if (Test-Path $Paths.CliDist) {
-    Write-Host "[ok] CLI artifact: $($Paths.CliDist)"
-  } else {
-    Write-Host "[info] CLI artifact missing (build with .\lumos.cmd build cli)"
+    Write-Host "[info] Desktop artifact missing (build with .\lumos.cmd build --force)"
   }
 }
 
@@ -102,50 +93,26 @@ function Split-ForceFlag([string[]]$InputArgs) {
   }
 }
 
-function Invoke-Build([string]$BuildKind, [switch]$Force, [hashtable]$Paths) {
+function Invoke-Build([switch]$Force, [hashtable]$Paths) {
   $guiCmd = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $Paths.GuiBuildScript)
   if ($Force) {
     $guiCmd += "-Force"
   }
-
-  $cliCmd = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $Paths.CliBuildScript)
-  if ($Force) {
-    $cliCmd += "-Force"
-  }
-
-  switch ($BuildKind) {
-    "gui" {
-      & powershell @guiCmd
-      if ($LASTEXITCODE -ne 0) { throw "GUI build failed." }
-    }
-    "cli" {
-      & powershell @cliCmd
-      if ($LASTEXITCODE -ne 0) { throw "CLI build failed." }
-    }
-    "all" {
-      & powershell @guiCmd
-      if ($LASTEXITCODE -ne 0) { throw "GUI build failed as part of build all." }
-
-      & powershell @cliCmd
-      if ($LASTEXITCODE -ne 0) { throw "CLI build failed as part of build all." }
-    }
-    default {
-      throw "Unknown build target '$BuildKind'. Use: all, gui, or cli."
-    }
-  }
+  & powershell @guiCmd
+  if ($LASTEXITCODE -ne 0) { throw "Desktop build failed." }
 }
 
-function Ensure-Built([string]$Kind, [switch]$Force, [hashtable]$Paths) {
-  $artifact = if ($Kind -eq "gui") { $Paths.GuiDist } else { $Paths.CliDist }
+function Ensure-Built([switch]$Force, [hashtable]$Paths) {
+  $artifact = $Paths.DesktopDist
   if ($Force -or -not (Test-Path $artifact)) {
-    Invoke-Build -BuildKind $Kind -Force:$Force -Paths $Paths
+    Invoke-Build -Force:$Force -Paths $Paths
   }
   return $artifact
 }
 
 function Assert-CommandOrder([string[]]$AllArgs) {
   if ($AllArgs.Count -gt 0 -and $AllArgs[0].StartsWith("-")) {
-    throw "Unknown leading flag '$($AllArgs[0])'. Use command-first syntax, e.g. .\lumos.cmd build all --force"
+    throw "Unknown leading flag '$($AllArgs[0])'. Use command-first syntax, e.g. .\lumos.cmd build --force"
   }
 }
 
@@ -153,8 +120,8 @@ $repoRoot = Get-RepoRoot
 $paths = Get-PathMap -RepoRoot $repoRoot
 
 if ($Args.Count -eq 0) {
-  $guiExe = Ensure-Built -Kind "gui" -Paths $paths
-  & $guiExe
+  $desktopExe = Ensure-Built -Paths $paths
+  & $desktopExe
   exit $LASTEXITCODE
 }
 
@@ -175,40 +142,34 @@ switch ($command) {
   }
 
   "build" {
-    $buildKind = "all"
-    $buildArgs = $tail
-
-    if ($buildArgs.Count -gt 0 -and @("all", "gui", "cli") -contains $buildArgs[0].ToLowerInvariant()) {
-      $buildKind = $buildArgs[0].ToLowerInvariant()
-      $buildArgs = if ($buildArgs.Count -gt 1) { @($buildArgs[1..($buildArgs.Count - 1)]) } else { @() }
-    }
-
-    $parsed = Split-ForceFlag -InputArgs $buildArgs
+    $parsed = Split-ForceFlag -InputArgs $tail
     if ($parsed.Args.Count -gt 0) {
       throw "Unknown build argument(s): $($parsed.Args -join ' ')"
     }
 
-    Invoke-Build -BuildKind $buildKind -Force:([bool]$parsed.Force) -Paths $paths
+    Invoke-Build -Force:([bool]$parsed.Force) -Paths $paths
     exit 0
+  }
+
+  "start" {
+    $parsed = Split-ForceFlag -InputArgs $tail
+    $desktopExe = Ensure-Built -Force:([bool]$parsed.Force) -Paths $paths
+    & $desktopExe @($parsed.Args)
+    exit $LASTEXITCODE
   }
 
   "gui" {
     $parsed = Split-ForceFlag -InputArgs $tail
-    $guiExe = Ensure-Built -Kind "gui" -Force:([bool]$parsed.Force) -Paths $paths
-    & $guiExe @($parsed.Args)
+    $desktopExe = Ensure-Built -Force:([bool]$parsed.Force) -Paths $paths
+    & $desktopExe @($parsed.Args)
     exit $LASTEXITCODE
   }
 
   "cli" {
-    $parsed = Split-ForceFlag -InputArgs $tail
-    $cliExe = Ensure-Built -Kind "cli" -Force:([bool]$parsed.Force) -Paths $paths
-    & $cliExe @($parsed.Args)
-    exit $LASTEXITCODE
+    throw "CLI command is not supported. Lumos is desktop-only. Use .\lumos.cmd start"
   }
 
   default {
-    $guiExe = Ensure-Built -Kind "gui" -Paths $paths
-    & $guiExe @Args
-    exit $LASTEXITCODE
+    throw "Unknown command '$command'. Run .\lumos.cmd help"
   }
 }

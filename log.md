@@ -51,3 +51,12 @@ VERIFIED: Manual doc review for consistency and enforcement references
 RISKS: None
 NEXT: Apply the updated standards to upcoming UI and engine iterations
 ```
+
+```text
+DATE: 2026-02-15
+FOCUS: Simplify launcher to desktop-only two-command workflow
+CHANGES: Removed CLI launcher path; implemented desktop-only `build` and `start` commands; hardened build script to require `lumos_app` target and stage a single desktop executable
+VERIFIED: .\lumos.cmd doctor; .\lumos.cmd build --force (expected clear Qt/target error on this environment); .\lumos.cmd --force build (expected command-order error)
+RISKS: Desktop build/start requires Qt6 discoverable by CMake to generate `lumos_app`
+NEXT: Install/configure Qt6 path and validate end-to-end desktop launch
+```

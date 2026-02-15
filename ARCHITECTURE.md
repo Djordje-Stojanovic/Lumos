@@ -56,7 +56,7 @@ Everything else is optional until these are stable and fast.
 
 1. One active implementation branch at a time.
 2. All post-bootstrap changes go via PR.
-3. Reviewer validates behavior before merge.
+3. User validates behavior before merge.
 4. If scope grows, split PR before merge.
 5. Keep changes reversible and test-backed.
 

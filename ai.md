@@ -23,8 +23,8 @@ local AI enhancement, one-time purchase economics, and professional results with
 
 ## Ownership Doctrine
 
-- Single active implementation owner: `builder`.
-- Reviewer/user validates behavior and merges.
+- Single active implementation owner: Codex.
+- User validates behavior and merges.
 - `src/contracts/**` is protected and changed intentionally.
 - If blocked, ship a local placeholder path and keep momentum.
 
@@ -47,7 +47,7 @@ Pick one, ship one, verify one.
 4. Build and test changed scope
 5. Commit: `<type>(<scope>): <what and why>`
 6. Push branch and open PR
-7. Reviewer tests/merges
+7. User tests/merges
 8. Delete branch and repeat
 
 ## Quality Bar

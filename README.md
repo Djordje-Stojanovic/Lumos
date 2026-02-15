@@ -58,7 +58,7 @@ Then for every change:
 4. Build/tests
 5. Commit + push branch
 6. Open PR
-7. User reviews/tests/merges
+7. User validates/tests/merges
 8. Delete branch
 
 ## Core Rule

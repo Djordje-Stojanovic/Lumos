@@ -1,11 +1,6 @@
-# AGENTS.md - Lean Ownership Workflow
+# AGENTS.md - Single-Agent Workflow
 
-This repo runs a low-overhead two-person flow:
-
-- `builder` (agent): implements code changes
-- `reviewer` (user): tests behavior, reviews PRs, merges, and validates scope
-
-No coordination theater. No idle loops. No bloated process.
+This repo runs a single coding-agent workflow with direct user validation.
 
 ## Prime Directive
 
@@ -22,8 +17,8 @@ After initial bootstrap push, every code change must go through a feature branch
 
 ## Ownership Rules
 
-1. `builder` edits implementation and tests.
-2. `reviewer` validates behavior and merges.
+1. Codex edits implementation and tests.
+2. User validates behavior and merges.
 3. `src/contracts/**` is deliberate-change-only.
 4. One change per branch. One concern per PR.
 5. Never push directly to `main` after bootstrap.
@@ -32,7 +27,7 @@ After initial bootstrap push, every code change must go through a feature branch
 
 - Code: `src/`
 - Tests: `tests/`
-- Build/config when needed: `CMakeLists.txt`, `cmake/`, `tools/`
+- Build/config when needed: `cmake/`, `tools/`
 
 ## Session Workflow
 
@@ -40,13 +35,6 @@ After initial bootstrap push, every code change must go through a feature branch
 
 1. Sync: `git fetch origin && git rebase origin/main`
 2. Branch: `git checkout -b feature/<scope>-<short-desc>`
-3. Log start in `codex_agents_logs.md`:
-
-```text
-START | <timestamp+tz> | builder | task: <one-line summary>
-SCOPE | <file paths>
-BRANCH | feature/<scope>-<short-desc>
-```
 
 ### Work
 
@@ -59,8 +47,7 @@ BRANCH | feature/<scope>-<short-desc>
 1. `git add -A && git commit -m "<type>(<scope>): <what and why>"`
 2. `git push origin feature/<scope>-<short-desc>`
 3. `gh pr create --title "<type>(<scope>): <desc>" --body "<what changed and why>"`
-4. Reviewer tests and either approves/merges or requests changes.
-5. Log finish in `codex_agents_logs.md`.
+4. User tests and either merges or requests changes.
 
 ## Commit Types
 

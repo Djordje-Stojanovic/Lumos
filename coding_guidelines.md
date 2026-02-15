@@ -5,9 +5,9 @@ Mandatory checklist for each coding session.
 ## Read Order
 
 1. `CLAUDE.md`
-2. `.claude/agents/builder.md`
-3. `ai.md`
-4. `AGENTS.md`
+2. `ai.md`
+3. `AGENTS.md`
+4. `lumos-ai-plan.md`
 
 ## Session Rules
 

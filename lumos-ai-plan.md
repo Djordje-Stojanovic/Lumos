@@ -576,7 +576,7 @@ Operating model: one user (product/review/merge) + one agent (implementation). K
 | Test Type | Framework | Scope | Frequency |
 |---|---|---|---|
 | Unit tests | Google Test | Engine logic: tile splitting, pipeline chaining, preset serialization, VRAM budget | Every commit (local) |
-| Integration tests | Google Test + custom harness | Full pipeline: load → process → verify PSNR > threshold | Every PR merge (local + reviewer) |
+| Integration tests | Google Test + custom harness | Full pipeline: load → process → verify PSNR > threshold | Every PR merge (local + owner validation) |
 | GPU smoke tests | Custom harness | Real GPU: ONNX model loads, inference completes, output dimensions correct | Weekly manual on target GPUs |
 | UI tests | Qt Test + Squish (if budget) | Critical flows: drag-drop, enhance, before/after, batch | Weekly manual |
 | Performance benchmarks | Custom harness + timer | Processing time per model per GPU. Alert if regression > 10% | Weekly manual |

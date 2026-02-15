@@ -14,19 +14,15 @@ Lumos AI is a local-first Windows desktop app for AI image and video enhancement
 - Logging: spdlog
 - Tests: Google Test + Qt Test (run via CTest)
 
-## Lean Team Model
+## Operating Model
 
-- `builder` (Codex): implementation
-- `reviewer` (User): validates behavior, tests, reviews PR, merges PR
-- `team-lead` (User): prioritization and scope decisions
-
-Current implementation model: one active implementation agent with strict branch discipline.
+One coding agent (Codex) implements changes. The user sets priorities, validates behavior, and approves merges.
 
 ## Module Ownership
 
 | Module | Owner | Code Directory | Test Directory | Responsibility |
 |---|---|---|---|---|
-| `core` | `builder` | `src/` | `tests/` | End-to-end app implementation across UI, engine, and platform integrations |
+| `core` | `codex` | `src/` | `tests/` | End-to-end app implementation across UI, engine, and platform integrations |
 
 Shared contracts path: `src/contracts/**` (protected; deliberate changes only).
 
@@ -60,7 +56,7 @@ All work after bootstrap happens on feature branches and pull requests.
 5. `git add -A && git commit -m "<type>(<scope>): <what and why>"`
 6. `git push origin feature/<scope>-<short-desc>`
 7. `gh pr create --title "<type>(<scope>): <desc>" --body "<what changed and why>"`
-8. Reviewer tests and merges (`--squash --delete-branch`)
+8. User validates and merges (`--squash --delete-branch`)
 9. Sync main and start next small branch
 
 ## Verification Commands

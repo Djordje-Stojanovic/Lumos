@@ -25,7 +25,13 @@ lumos_set_project_warnings(lumos_core)
 if(LUMOS_BUILD_UI)
     find_package(Qt6 COMPONENTS Core Gui Qml Quick QUIET)
     if(Qt6_FOUND)
-        add_executable(lumos_app src/main.cpp)
+        set(CMAKE_AUTOMOC ON)
+        add_executable(
+            lumos_app
+            src/main.cpp
+            src/ui/EnhanceViewModel.cpp
+            src/ui/EnhanceViewModel.h
+        )
         target_compile_definitions(lumos_app PRIVATE LUMOS_WITH_QT=1)
         target_link_libraries(
             lumos_app

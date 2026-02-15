@@ -52,6 +52,30 @@ void testSuccessPathEmitsRequiredEvents() {
     lumos::tests::requireFileSizePositive(log_path, "telemetry log should be written");
 }
 
+void testInputSelectionTelemetryEmitsBeforeEnhancement() {
+    const auto log_path = lumos::tests::tempOutputPath("telemetry_input_selected.jsonl");
+    std::filesystem::remove(log_path);
+
+    lumos::common::Telemetry telemetry(log_path);
+    lumos::engine::CpuStubPipeline pipeline;
+    lumos::app::EnhancementController controller(pipeline, telemetry);
+
+    const auto input_path = lumos::tests::fixturePath("sample_input.ppm").string();
+    controller.trackInputSelected(input_path);
+
+    const auto* selected = findEvent(telemetry.events(), "input_selected");
+    lumos::tests::require(selected != nullptr, "input_selected should be emitted");
+    lumos::tests::require(
+        selected->fields.find("input_ext") != selected->fields.end(),
+        "input_selected should include input_ext");
+    lumos::tests::require(
+        selected->fields.find("input_width") != selected->fields.end(),
+        "input_selected should include input_width when dimensions are known");
+    lumos::tests::require(
+        selected->fields.find("input_height") != selected->fields.end(),
+        "input_selected should include input_height when dimensions are known");
+}
+
 void testFailurePathEmitsErrorDetails() {
     const auto log_path = lumos::tests::tempOutputPath("telemetry_failure.jsonl");
     std::filesystem::remove(log_path);
@@ -83,6 +107,7 @@ void testFailurePathEmitsErrorDetails() {
 int main() {
     try {
         testSuccessPathEmitsRequiredEvents();
+        testInputSelectionTelemetryEmitsBeforeEnhancement();
         testFailurePathEmitsErrorDetails();
         std::cout << "TelemetryTests passed\n";
         return 0;

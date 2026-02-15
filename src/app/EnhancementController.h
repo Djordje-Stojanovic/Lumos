@@ -12,6 +12,7 @@ class EnhancementController {
   public:
     EnhancementController(contracts::IEnhancementPipeline& pipeline, common::Telemetry& telemetry);
 
+    void trackInputSelected(const std::string& input_path);
     contracts::EnhancementResult runEnhancement(const contracts::EnhancementRequest& request);
     std::future<contracts::EnhancementResult> runEnhancementAsync(contracts::EnhancementRequest request);
 

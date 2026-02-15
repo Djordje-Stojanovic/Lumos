@@ -2,7 +2,7 @@
 
 ## Context
 
-This document is the complete build specification for a local AI image and video enhancement desktop application sold as a one-time purchase on Steam and Microsoft Store. The working product name is "Lumos AI." The execution model is lean: one owner-operator user plus one coding agent. The target is $1M gross revenue in year 1, scaling to $100M cumulative revenue by year 5–7.
+This document is the complete build specification for a local AI image and video enhancement desktop application sold as a one-time purchase on Steam and Microsoft Store. The working product name is "Lumos AI." The execution model is one owner-operator user plus one coding agent. The target is $1M gross revenue in year 1, scaling to $100M cumulative revenue by year 5–7.
 
 The opportunity: Topaz Labs proved a small team (~60 people) can build a $48M-valued business in local AI enhancement. In September 2025, Topaz switched from $299 one-time to $25–58/month subscriptions, triggering massive backlash. No AI enhancement tool exists on Steam, where 132–147M monthly active users own powerful GPUs. This is the gap.
 
@@ -511,7 +511,7 @@ DLC is implemented as feature flags, not separate codebases. All DLC code ships 
 
 Ship on Steam and Microsoft Store simultaneously. Direct website sales as third channel.
 
-### Build/Release operations (lean)
+### Build/Release operations
 
 - **Local verification first**: Before every PR, run local build and core tests on Windows x64 (MSVC 2022).
 - **Release builds**: Tagged commits produce optimized signed artifacts and package outputs for Steam depot + MSIX.
@@ -519,7 +519,7 @@ Ship on Steam and Microsoft Store simultaneously. Direct website sales as third 
 - **Crash reporting**: Crashpad + Sentry/BugSplat for field issue diagnosis.
 ---
 
-## 12. Execution Plan (Weeks 1–36, Lean User+Agent Model)
+## 12. Execution Plan (Weeks 1–36, User+Agent Model)
 
 Operating model: one user (product/review/merge) + one agent (implementation). Keep weekly pace sustainable, prioritize shipping over process.
 
@@ -546,7 +546,7 @@ Operating model: one user (product/review/merge) + one agent (implementation). K
 - Release candidate: feature freeze, regression pass, store submission.
 - Launch: Steam first-week velocity, fast support loop, hotfix critical issues within 48 hours.
 
-### Work Rhythm (No Bloat)
+### Work Rhythm
 
 - One scoped change per branch
 - Local build/tests before every PR
@@ -555,7 +555,7 @@ Operating model: one user (product/review/merge) + one agent (implementation). K
 
 ---
 
-## 13. Team Role Assignments (Lean)
+## 13. Team Role Assignments
 
 | Role | Primary Responsibilities | Secondary |
 |---|---|---|

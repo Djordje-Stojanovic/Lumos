@@ -33,3 +33,12 @@ VERIFIED: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release; cmake --build build --
 RISKS: Qt6 is not installed in this environment so the `lumos_app` UI target is skipped at configure time
 NEXT: Add real model-backed inference path behind the same pipeline contract
 ```
+
+```text
+DATE: 2026-02-15
+FOCUS: Add one-command Windows launcher workflow for build/run/doctor
+CHANGES: Added lumos.cmd wrapper, launcher dispatcher, native build scripts with staged dist outputs, and README command docs with command-order rules
+VERIFIED: .\lumos.cmd doctor; .\lumos.cmd --force build (expected command-order error)
+RISKS: CLI flow depends on a dedicated CLI executable target (`lumos_cli`) that is not part of current core scaffold yet
+NEXT: Add a first CLI binary target or route CLI command to a supported fallback target
+```

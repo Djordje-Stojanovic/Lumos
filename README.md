@@ -37,6 +37,33 @@ cmake --build build --config Release -j
 ctest --test-dir build --output-on-failure
 ```
 
+## Windows Launcher Workflow
+
+Use the shareable launcher interface from repo root:
+
+```powershell
+.\lumos.cmd doctor
+.\lumos.cmd build all --force
+.\lumos.cmd build gui --force
+.\lumos.cmd build cli --force
+.\lumos.cmd
+.\lumos.cmd gui
+.\lumos.cmd cli --json --no-persist
+```
+
+Command-order rule:
+
+- Correct: `.\lumos.cmd build all --force`
+- Wrong: `.\lumos.cmd --force build`
+
+Launcher implementation files:
+
+- `lumos.cmd` thin wrapper entrypoint
+- `installer/windows/lumos_launcher.ps1` command dispatcher
+- `installer/windows/build_shell_native.ps1` GUI build + dist staging
+- `installer/windows/build_platform_native.ps1` CLI build + dist staging
+- `installer/windows/build_native.ps1` shared native build logic
+
 ## Development Workflow
 
 Bootstrap once (allowed direct push to main):

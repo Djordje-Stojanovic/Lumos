@@ -1,0 +1,40 @@
+name: core-quality-gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - "feature/**"
+  workflow_dispatch:
+
+jobs:
+  core-quality-gate:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure (core-only)
+        shell: pwsh
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DLUMOS_BUILD_UI=OFF -DLUMOS_BUILD_TESTS=ON
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release -j
+
+      - name: Test
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Upload test artifacts (failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-quality-gate-test-artifacts
+          if-no-files-found: warn
+          path: |
+            build/Testing/**
+            build/**/Test.xml

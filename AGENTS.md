@@ -61,8 +61,9 @@ After initial bootstrap push, every code change must go through a feature branch
 
 1. `git add -A && git commit -m "<type>(<scope>): <what and why>"`
 2. `git push origin feature/<scope>-<short-desc>`
-3. `gh pr create --title "<type>(<scope>): <desc>" --body "<what changed and why>"`
-4. User tests and either merges or requests changes.
+3. `gh pr create --title "<type>(<scope>): <desc>" --body "<why / what / validation>"`
+4. Ensure required status checks pass (including `core-quality-gate`) before merge.
+5. User tests and either merges or requests changes.
 
 ## Commit Types
 
